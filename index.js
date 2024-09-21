@@ -2,6 +2,8 @@
   let canvasInstance;
   let walls = [];
   let bird;
+  const WallWidth = 60;
+  const interval = 120;
 
   function initCanvas() {
     const cvs = document.querySelector("#cvs");
@@ -40,35 +42,39 @@
     }
   }
   function generateWalls() {
-    let count = 5;
     // 墙与墙之间的间距
-    let interval = 20;
+    const channelHeight = canvasInstance.canvas.height / 4;
+    const count = Math.ceil(
+      canvasInstance.canvas.width / (WallWidth + interval)
+    );
     walls = new Array(count).fill(1).map((_, index) => {
       return new Wall({
+        index: index,
         speed: 1,
-        x: 0 + index * 100 + interval,
+        x: (WallWidth + interval) * index,
         y: 200,
-        dx: 30,
-        dy: 200,
+        dx: WallWidth,
         canvasContext: canvasInstance,
+        channelHeight: channelHeight,
+        interval,
       });
     });
+    // 在 new 时传 walls 会获取到空数组，故用此方式
+    walls.forEach((w) => {
+      w.setWalls(walls);
+    });
     notifyWallsUpdate();
-    // setInterval(() => {
-    //   notifyWallsUpdate();
-    // }, 500);
   }
   function notifyWallsUpdate() {
     walls.forEach((w) => {
-      w.move();
+      w.updateDraw();
     });
   }
   function addKeyBoardUpListener() {
     document.addEventListener("keyup", (event) => {
-      console.log(event);
       if (event.code === "Space") {
         canvasInstance.clearRect(bird.x, bird.y, bird.width, bird.height);
-        bird.y -= 50;
+        bird.y -= 40;
       }
     });
   }
