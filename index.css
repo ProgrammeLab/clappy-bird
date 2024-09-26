@@ -6,3 +6,13 @@
 .game-container {
   border: 1px solid red;
 }
+
+.score-wrapper {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bolder;
+}
+
+#score {
+  display: inline;
+}

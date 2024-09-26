@@ -2,19 +2,26 @@
   let canvasInstance;
   let walls = [];
   let bird;
+  const birdWidth = 30;
+  const birdHeight = 30;
+  const birdPostionX = 10;
+  let scoreEle;
+  let score = 0;
+  let preNearestWall;
   const WallWidth = 60;
   const interval = 120;
 
   function initCanvas() {
     const cvs = document.querySelector("#cvs");
     canvasInstance = cvs.getContext("2d");
+    scoreEle = document.querySelector("#score");
   }
   function init() {
     initCanvas();
     startAnimation();
     generateWalls();
     addKeyBoardUpListener();
-    bird = new Bird(10, 200, 30, 30);
+    bird = new Bird(birdPostionX, 200, birdWidth, birdHeight);
     // canvasInstance.fillRect(0, 100, 100, 100);
     // canvasInstance.clearRect(0, 100, 50, 50);
   }
@@ -27,6 +34,7 @@
   function paint() {
     notifyWallsUpdate();
     drawBird();
+    detectScore();
   }
   function drawBird() {
     if (!bird) {
@@ -51,7 +59,7 @@
       return new Wall({
         index: index,
         speed: 1,
-        x: (WallWidth + interval) * index,
+        x: interval + (WallWidth + interval) * index,
         y: 200,
         dx: WallWidth,
         canvasContext: canvasInstance,
@@ -65,10 +73,29 @@
     });
     notifyWallsUpdate();
   }
+  /** 更新墙位置 */
   function notifyWallsUpdate() {
     walls.forEach((w) => {
       w.updateDraw();
     });
+  }
+  /** 得分检测 */
+  function detectScore() {
+    let nearestWall = walls?.[0];
+    walls.forEach((w) => {
+      if (w?.x + w?.dx <= nearestWall?.x + nearestWall?.dx) {
+        nearestWall = w;
+      }
+    });
+    const nearestX = nearestWall?.x + nearestWall?.dx;
+
+    if (
+      nearestX < birdPostionX &&
+      nearestWall?.originalX !== preNearestWall?.originalX
+    ) {
+      preNearestWall = nearestWall;
+      scoreEle.innerHTML = ++score;
+    }
   }
   function addKeyBoardUpListener() {
     document.addEventListener("keyup", (event) => {
