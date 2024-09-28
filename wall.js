@@ -1,29 +1,39 @@
 class Wall {
+  /** 当前绘制在 canvas 中的 x 坐标 */
   x;
-  y;
+  /** 宽度 */
   dx;
-  dy;
+  /** 第一次渲染时的 x 坐标 */
   originalX;
+  /** 当前的 canvas context 对象，用于绘制操作 */
   canvasContext;
+  /** 每一帧移动的距离 */
+  speed;
+  /** 当前墙体在所有墙体中的下标 */
+  index;
+  /** 每一道墙的安全通道高度 */
+  channelHeight;
+  /** 墙与墙之间的间隔 */
+  interval;
+  /** 上半墙体开始绘制的 x 坐标 */
+  topX;
+  /** 上半墙体开始绘制的 y 坐标 */
+  topY;
+  /** 上半墙体的高度 */
+  topPartHeight;
+  /** 下半墙体开始绘制的 x 坐标 */
+  bottomX;
+  /** 下半墙体开始绘制的 y 坐标 */
+  bottomY;
+  /** 下半墙体的高度 */
+  bottomPartHeight;
   constructor(config) {
-    const {
-      index,
-      x,
-      y,
-      dx,
-      dy,
-      speed,
-      channelHeight,
-      walls,
-      interval,
-      canvasContext,
-    } = config;
+    const { index, x, dx, speed, channelHeight, interval, canvasContext } =
+      config;
     this.speed = speed;
     this.originalX = x;
     this.x = x;
-    this.y = y;
     this.dx = dx;
-    this.dy = dy;
     this.channelHeight = channelHeight;
     this.canvasContext = canvasContext;
     this.index = index;
@@ -35,6 +45,9 @@ class Wall {
     this.walls = walls;
   }
 
+  /**
+   * 在移动到可视区域外时，更新墙的上下部分高度并移动到最后形成循环移动
+   */
   generateRandomHeightWall() {
     // canvas 容器宽高
     let canvasHeight = this.canvasContext.canvas.height;
@@ -56,6 +69,9 @@ class Wall {
     this.bottomPartHeight = canvasHeight - topPartHeight - this.channelHeight;
   }
 
+  /**
+   * 移动墙体，改变 x、topX、bottomX 坐标
+   */
   move() {
     this.x -= this.speed;
     this.topX = this.x;
@@ -76,6 +92,13 @@ class Wall {
       this.generateRandomHeightWall();
     }
   }
+
+  /**
+   * 更新墙体的绘制，即绘制下一帧墙体，包含如下步骤
+   * 1. 清除当前绘制的部分
+   * 2. 移动墙体，改变 x 坐标
+   * 3. 绘制移动后的墙体（上下部分）
+   */
   updateDraw() {
     // clean 之前渲染的
     this.canvasContext.clearRect(

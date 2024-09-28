@@ -1,41 +1,70 @@
 (function () {
+  /** canvas 2d 实例 */
   let canvasInstance;
+  /** 墙体 */
   let walls = [];
+  /** 操控的鸟 */
   let bird;
+  /** 鸟的宽度 */
   const birdWidth = 30;
+  /** 鸟的高度 */
   const birdHeight = 30;
+  /** 鸟的 x 坐标 */
   const birdPostionX = 10;
+  /** 分数 dom 元素 */
   let scoreEle;
+  /** 分数 */
   let score = 0;
+  /** 当前距离 鸟最近的墙，用于得分检测 */
   let preNearestWall;
+  /** 每一道墙的宽度 */
   const WallWidth = 60;
+  /** 墙与墙之间的间隔 */
   const interval = 120;
 
+  /**
+   * 初始化 canvas 对象，寻找 canvas dom 节点
+   */
   function initCanvas() {
     const cvs = document.querySelector("#cvs");
     canvasInstance = cvs.getContext("2d");
     scoreEle = document.querySelector("#score");
   }
+
+  /**
+   * 初始化游戏
+   */
   function init() {
     initCanvas();
     startAnimation();
     generateWalls();
     addKeyBoardUpListener();
     bird = new Bird(birdPostionX, 200, birdWidth, birdHeight);
-    // canvasInstance.fillRect(0, 100, 100, 100);
-    // canvasInstance.clearRect(0, 100, 50, 50);
   }
+
+  /**
+   * 开时无限调用帧动画
+   */
   function startAnimation() {
     window.requestAnimationFrame(() => {
       startAnimation();
       paint();
     });
   }
+
+  /**
+   * 每一帧的绘制操作
+   */
   function paint() {
     notifyWallsUpdate();
     drawBird();
     detectScore();
   }
+
+  /**
+   * 绘制 bird
+   * @returns
+   */
   function drawBird() {
     if (!bird) {
       return;
@@ -49,6 +78,10 @@
       }
     }
   }
+
+  /**
+   * 初始化墙体数组
+   */
   function generateWalls() {
     // 墙与墙之间的间距
     const channelHeight = canvasInstance.canvas.height / 4;
@@ -73,12 +106,14 @@
     });
     notifyWallsUpdate();
   }
+
   /** 更新墙位置 */
   function notifyWallsUpdate() {
     walls.forEach((w) => {
       w.updateDraw();
     });
   }
+
   /** 得分检测 */
   function detectScore() {
     let nearestWall = walls?.[0];
@@ -97,6 +132,10 @@
       scoreEle.innerHTML = ++score;
     }
   }
+
+  /**
+   * 添加空格监听事件
+   */
   function addKeyBoardUpListener() {
     document.addEventListener("keyup", (event) => {
       if (event.code === "Space") {
