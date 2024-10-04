@@ -21,6 +21,8 @@
   const WallWidth = 60;
   /** 墙与墙之间的间隔 */
   const interval = 120;
+  /** animation frame Id */
+  let animationFrameId;
 
   /**
    * 初始化 canvas 对象，寻找 canvas dom 节点
@@ -46,7 +48,7 @@
    * 开时无限调用帧动画
    */
   function startAnimation() {
-    window.requestAnimationFrame(() => {
+    animationFrameId = window.requestAnimationFrame(() => {
       startAnimation();
       paint();
     });
@@ -59,6 +61,12 @@
     notifyWallsUpdate();
     drawBird();
     detectScore();
+    if (detectCollision()) {
+      const confirm = window.confirm("Game Over");
+      if (confirm) {
+        reStartGame();
+      }
+    }
   }
 
   /**
@@ -143,6 +151,49 @@
         bird.y -= 40;
       }
     });
+  }
+
+  /**
+   * 碰撞检测
+   */
+  function detectCollision() {
+    const birdRightX = bird.x + bird.width;
+    const birdLeftX = bird.x;
+    const birdTopY = bird.y;
+    const birdBottomY = bird.y + bird.height;
+    return walls.some((w) => {
+      const wallRightX = w.x + w.dx;
+      const wallLeftX = w.x;
+      const topWallTopY = w.topY;
+      const topWallBottomY = w.topY + w.topPartHeight;
+      const bottomWallTopY = w.bottomY;
+      const bottomWallBottomY = w.bottomY + w.bottomPartHeight;
+      // 上半部分
+      const isTopCollision =
+        birdRightX >= wallLeftX && // 如果矩形1的右边界大于等于矩形2的左边界，
+        birdLeftX <= wallRightX && //且矩形1的左边界小于等于矩形2的右边界，
+        birdBottomY >= topWallTopY && //且矩形1的下边界大于等于矩形2的上边界
+        birdTopY <= topWallBottomY; //且矩形1的上边界小于等于矩形2的下边界
+      // 下半部分
+      const isBottomCollision =
+        birdRightX >= wallLeftX && // 如果矩形1的右边界大于等于矩形2的左边界，
+        birdLeftX <= wallRightX && //且矩形1的左边界小于等于矩形2的右边界，
+        birdBottomY >= bottomWallTopY && //且矩形1的下边界大于等于矩形2的上边界
+        birdTopY <= bottomWallBottomY; //且矩形1的上边界小于等于矩形2的下边界
+      return isBottomCollision || isTopCollision;
+    });
+  }
+  /** 重新开始游戏 */
+  function reStartGame() {
+    score = 0;
+    scoreEle.innerHTML = score;
+    if (animationFrameId) {
+      canvasInstance.clearRect(0, 0, 600, 400);
+      cancelAnimationFrame(animationFrameId);
+      bird = new Bird(birdPostionX, 200, birdWidth, birdHeight);
+      generateWalls();
+      startAnimation();
+    }
   }
   init();
 })();
