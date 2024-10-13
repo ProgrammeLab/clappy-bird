@@ -23,6 +23,8 @@
   const interval = 120;
   /** animation frame Id */
   let animationFrameId;
+  /** 小鸟单次跳跃的高度 */
+  const birdJumpHeight = 40;
 
   /**
    * 初始化 canvas 对象，寻找 canvas dom 节点
@@ -148,7 +150,7 @@
     document.addEventListener("keyup", (event) => {
       if (event.code === "Space") {
         canvasInstance.clearRect(bird.x, bird.y, bird.width, bird.height);
-        bird.y -= 40;
+        bird.y -= birdJumpHeight;
       }
     });
   }
