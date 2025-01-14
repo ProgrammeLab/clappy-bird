@@ -20,11 +20,11 @@
   /** 每一道墙的宽度 */
   const WallWidth = 60;
   /** 墙与墙之间的间隔 */
-  const interval = 120;
+  const interval = 140;
   /** animation frame Id */
   let animationFrameId;
   /** 小鸟单次跳跃的高度 */
-  const birdJumpHeight = 40;
+  const birdJumpHeight = 80;
 
   /**
    * 初始化 canvas 对象，寻找 canvas dom 节点
@@ -53,6 +53,15 @@
     animationFrameId = window.requestAnimationFrame(() => {
       startAnimation();
       paint();
+      detectScore();
+      if (detectCollision()) {
+        cancelAnimationFrame(animationFrameId);
+        removeKeyup();
+        // const confirm = window.confirm("Game Over");
+        // if (confirm) {
+        //   reStartGame();
+        // }
+      }
     });
   }
 
@@ -62,13 +71,6 @@
   function paint() {
     notifyWallsUpdate();
     drawBird();
-    detectScore();
-    if (detectCollision()) {
-      const confirm = window.confirm("Game Over");
-      if (confirm) {
-        reStartGame();
-      }
-    }
   }
 
   /**
@@ -147,12 +149,20 @@
    * 添加空格监听事件
    */
   function addKeyBoardUpListener() {
-    document.addEventListener("keyup", (event) => {
-      if (event.code === "Space") {
-        canvasInstance.clearRect(bird.x, bird.y, bird.width, bird.height);
-        bird.y -= birdJumpHeight;
-      }
-    });
+    document.addEventListener("keyup", throllteKeyHandler);
+  }
+
+  function removeKeyup() {
+    document.removeEventListener("keyup", throllteKeyHandler);
+  }
+
+  const throllteKeyHandler = throttle(handleKeyup, true, 300);
+
+  function handleKeyup(event) {
+    if (event.code === "Space") {
+      canvasInstance.clearRect(bird.x, bird.y, bird.width, bird.height);
+      bird.y -= birdJumpHeight;
+    }
   }
 
   /**
@@ -185,6 +195,7 @@
       return isBottomCollision || isTopCollision;
     });
   }
+
   /** 重新开始游戏 */
   function reStartGame() {
     score = 0;
